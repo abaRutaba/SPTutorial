@@ -1,0 +1,321 @@
+<script src="/_layouts/15/sp.runtime.js" type="text/javascript"></script>
+<script src="/_layouts/15/sp.js" type="text/javascript"></script>
+<script src="/_layouts/15/sp.search.js" type="text/javascript"></script>
+<script src="/_layouts/15/sp.UserProfiles.js" type="text/javascript"></script>
+ 
+<script type="text/javascript"> 
+	 
+    var users = [];
+    var userProfileProperties = [];
+    var fetchedUserCount = 0;
+
+	 $(document).ready(function () {
+ 
+		users = [];
+        userProfileProperties = [];
+        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', getAllUsers); 
+
+		$("#txtSearchBox").keypress(function(event) {
+		    if (event.key === "Enter") {
+		        users = [];
+            	userProfileProperties = [];
+            	SP.SOD.executeFunc('sp.js', 'SP.ClientContext', getAllUsers);
+				return false;
+		    }
+		});		
+        
+        $("#txtSearchBox").blur(function() {
+        	users = [];
+            userProfileProperties = [];
+            SP.SOD.executeFunc('sp.js', 'SP.ClientContext', getAllUsers);
+ 
+        }); 
+ 
+    });
+   
+ 
+    //Method to fetch all the users
+    function getAllUsers() {
+ 
+        //Textbox value containing search term
+        var searchTerm = $("#txtSearchBox").val() + "*";
+
+        clientContext = new SP.ClientContext.get_current();
+         
+        //Building Keyword query for the search
+        var keywordQuery = new Microsoft.SharePoint.Client.Search.Query.KeywordQuery(clientContext);
+        keywordQuery.set_queryText(searchTerm);
+        keywordQuery.set_sourceId("B09A7990-05EA-4AF9-81EF-EDFAB16C4E31");
+        //keywordQuery.set_rowLimit(0); //
+        keywordQuery.set_trimDuplicates(false);
+        keywordQuery.set_rowsPerPage = 5;
+        
+
+        var searchExecutor = new Microsoft.SharePoint.Client.Search.Query.SearchExecutor(clientContext);
+        results = searchExecutor.executeQuery(keywordQuery);
+         
+        clientContext.executeQueryAsync(onQuerySuccess, onQueryError);
+ 
+ 
+    }
+    function onQueryError(sender, args) {
+        alert(args.get_message());
+    }
+    function onQuerySuccess() {
+ 	
+ 		fetchedUserCount = 0;
+ 		fetchedUserCount = results.m_value.ResultTables[0].TotalRows; 	
+ 	
+       	$.each(results.m_value.ResultTables[0].ResultRows, function () {
+            users.push(this.AccountName); 
+        });
+ 
+        fetchProfilePropertiesForUsers();
+ 
+    }
+ 
+    
+    function fetchProfilePropertiesForUsers() {
+ 
+        var peopleManager = new SP.UserProfiles.PeopleManager(clientContext);
+ 
+        var profilePropertyNames = ["PreferredName", "PictureURL", "AboutMe", "TechNetProfile", "AccountName",
+         "Department", "CellPhone" , "SPS-Skills" , "WorkEmail" , "UserName" , "SPS-HireDate" , "WorkPhone", "Title"];
+
+        for (var i = 0; i < users.length; i++) {
+            var userProfilePropertiesForUser = new SP.UserProfiles.UserProfilePropertiesForUser(clientContext, users[i], profilePropertyNames);
+            userProfileProperties[i] = peopleManager.getUserProfilePropertiesFor(userProfilePropertiesForUser);
+        }
+ 
+        clientContext.executeQueryAsync(onSuccess, onQueryError);
+    }
+ 
+    function onSuccess() {
+
+        var html = "" ; 
+        
+        for (var i = 0; i < userProfileProperties.length; i++) {
+ 
+			/*html += "<div class='profile'><div class='floatL'><img src='" + userProfileProperties[i][1] + "' href='#' /></div><div class='floatR'><h2><span>" + userProfileProperties[i][0] + "</span></h2><span>About Me : " + userProfileProperties[i][2] + "</span><br /><span>TechNet Profile : </span><a href='" + userProfileProperties[i][3] + "'>" + userProfileProperties[i][3] + "</a><br /></div>" +
+			" -AccountName: " + userProfileProperties[i][4] + 
+			" -Department: " + userProfileProperties[i][5] + 
+			" -CellPhone: " + userProfileProperties[i][6] + 
+			" -SPS-Skills: " + userProfileProperties[i][7] + 
+			" -WorkEmail: " + userProfileProperties[i][8] + 
+			" -UserName: " + userProfileProperties[i][9] +            
+			" -SPS-HireDate: " + userProfileProperties[i][10] + 
+			" -WorkPhone: " + userProfileProperties[i][11] +            
+			"</div><br />";*/
+			
+			var image = userProfileProperties[i][1];
+			
+			if(!image)
+			{
+				image = "/Style%20Library/Images/Person-Icon.png" ;
+			}	            
+			    
+			html +="<div class='col-12 col-sm-6 col-lg-4 mb-3'>" +
+			  "<div class='border-radius employee-cards'>" +
+			    "<div class='tab-item-inn-emp d-flex'>" +
+			        "<img src='" + image + "' alt='employee' class='employeeImg'>" +
+			        "<div class='content-wrap-emp'>" +
+			            "<span>" + userProfileProperties[i][0] + "</span>" +
+			            "<p class='mangmnt'>" + userProfileProperties[i][12] + "</p>" +
+			            "<p class='skill'>Skills: " + userProfileProperties[i][7] + "</p>" +
+			            "<a href='#' mailto='" + userProfileProperties[i][8] + "'>" + userProfileProperties[i][8] + "</a>" +
+			            "<p>" + userProfileProperties[i][11] + "</p>" +
+			        "</div>" +
+			    "</div>" +
+			  "</div>" +
+			"</div>";            
+ 
+        }
+ 		
+ 		$("#EmpDir").html(html);
+ 		
+   		$("#EmpDirHeading").html('<h2>' + LanguageResourceVariable.EmployeeDirectory +'</h2>');
+ 		$("#EmpDirSeeAll").html(LanguageResourceVariable.SeeAll);
+ 
+    }
+ 
+     
+    /*Recently Joined Employee Code*/ 
+
+	var RecentEmployeeUrl = null;
+	var apiURL = null;
+	var userID = null;
+	var TaskHtml='';
+	var count=null;
+	var RecentEmployeeHtml='';
+
+     
+ 	$(document).ready(function () {
+		SP.SOD.executeFunc('sp.js', 'SP.ClientContext', GetRecentlyJoin);
+	});
+
+	function GetRecentlyJoin() {
+
+		var today = new Date();
+		var dd = today.getDate();
+		var prevmonth;
+		var mm = today.getMonth()+1; 
+		var pm= today.getMonth()-1; 
+		var yyyy = today.getFullYear();
+		if(dd<10) 
+		{
+		    dd='0'+dd;
+		} 
+		
+		if(mm<10) 
+		{
+		    mm='0'+mm;
+		} 
+		if(pm<10) 
+		{
+		    pm='0'+pm;
+		} 
+		today = mm+'-'+dd+'-'+yyyy;
+		prevmonth = pm+'-'+dd+'-'+yyyy;
+		console.log(today);
+		console.log(prevmonth);
+		
+		RecentEmployeeUrl = window.location.protocol + "//" + window.location.host ;
+		apiURL = "/_api/search/query?querytext=%27HireDate>="+prevmonth+"%20AND%20HireDate<="+today+"%27&sourceid=%27b09a7990-05ea-4af9-81ef-edfab16c4e31%27&selectproperties=%27PictureURL,PreferredName,JobTitle,Skills,Url,WorkEmail,WorkPhone,HireDate%27&rowlimit=4";
+		
+		RecentEmployeeUrl  = RecentEmployeeUrl + apiURL;
+		console.log("API URL => " + RecentEmployeeUrl);
+			
+		
+	    if (RecentEmployeeUrl!= null) {	
+	
+	        $.ajax({
+	            type: "GET",
+	            url: RecentEmployeeUrl,
+				contentType: "application/json; odata=verbose",
+	            cache: false,
+	            headers: {	
+	      			"accept": "application/json;odata=verbose"	
+	  			},
+	            success: function (data) {
+	                if (data) {
+						
+						var results = null;
+				
+						results = data.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results; 			
+						console.log(results.length);	
+		            	for (i = 0; i < results.length; i++) {  
+	                        var item = results[i];  
+	                        var itemCell = item.Cells;  
+	                        var itemResults = itemCell.results;  
+	                        //Get Values for User  
+	                       setrecentemployedata(itemResults);                         
+	                  	}
+	                } 
+                   	else {
+                    	console.log("No Data Returned");
+                	}
+	            },
+	            error: function (error) {
+	                console.log(error);
+	            }
+	        });	
+	    }
+	}
+
+
+	function setrecentemployedata(itemResults) {
+
+		getValueByKey("PictureURL", itemResults)==null?PictureURL=ADSSAGlobalVariables.DefaultNAImage:PictureURL=getValueByKey("PictureURL", itemResults);
+		getValueByKey("PreferredName", itemResults)==null?PreferredName="":PreferredName=getValueByKey("PreferredName", itemResults);
+		getValueByKey("JobTitle", itemResults)==null?JobTitle="":JobTitle=getValueByKey("JobTitle", itemResults);
+		getValueByKey("Skills", itemResults)==null?Skills="":Skills=getValueByKey("Skills", itemResults);
+		getValueByKey("WorkEmail", itemResults)==null?WorkEmail="":WorkEmail=getValueByKey("WorkEmail", itemResults);
+		getValueByKey("WorkPhone", itemResults)==null?WorkPhone="":WorkPhone=getValueByKey("WorkPhone", itemResults);
+		getValueByKey("Url", itemResults)==null?Url="":Url=getValueByKey("Url", itemResults);
+		
+		console.log(PictureURL);
+		console.log(PreferredName);
+		console.log(JobTitle);
+		console.log(Skills);
+		console.log(WorkEmail);
+		console.log(WorkPhone);
+
+		RecentEmployeeHtml =	'<div   class="swiper-slide"><div class="content-app" href="'+Url+'">'+
+            '<img src= "'+PictureURL+'" >'+
+            '<p class="name">'+PreferredName+' </p>'+
+            '<p class="mangmnt">'+JobTitle+'</p>'+
+            '<p class="skill">'+Skills+'</p>'+
+            '<a class="email" href="">'+WorkEmail+'</a>'+
+            '<p>'+
+            '<label href="" class="phone">'+WorkPhone+'</label>'+
+            '</p>'+
+        '</div></div>';     
+        
+		RecentEmployeeHtml =	"<div class='col-12 col-sm-6 col-lg-4 mb-3'>" +
+            "<div class='border-radius employee-cards'>" +
+              "<div class='tab-item-inn-emp d-flex'>" +
+                  "<img src='"+PictureURL+"' alt='employee' class='employeeImg'>" +
+                  "<div class='content-wrap-emp'>" +
+                      "<span>"+PreferredName+"</span>" +
+                      "<p class='mangmnt'>"+JobTitle+"</p>" +
+                      "<p class='skill'>Skills:"+Skills+"</p>" +
+                      "<a href='#' mailto='"+WorkEmail+"'>"+WorkEmail+"</a>" +
+                      "<p>"+WorkPhone+"</p>" +
+                  "</div>" +
+              "</div>" +
+            "</div>" +
+        "</div>";                              
+                                
+		$("#RecentEmployee").append(RecentEmployeeHtml);
+
+    }
+
+	function getValueByKey(key, results) {  
+        var postItem = $.grep(results, function(e) {  
+            if (e.Key === key) return e;  
+        })[0].Value;  
+        return postItem;  
+    }
+
+ 
+</script>
+ 
+<div class="inner-content-page">
+
+    <h3 class="inner-sub-name mb-4">employee directory</h3>
+
+    <div class="form-group mb-4 inputsearch">
+        <input type="text" class="form-control btnsc" placeholder="search" id="txtSearchBox">
+      </div>
+  
+
+    <div class="row" id="EmpDir">
+      
+     
+    </div>
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="pagination-number">
+                <li class="left-arrow"> <a href=""><</a> </li>
+                <li><a href="" class="active-page-num">1</a></li>
+                <li><a href="">2</a></li>
+                <li><a href="">3</a></li>
+                <li class="right-arrow"> <a href="">></a> </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="row mt-4" id="RecentEmployee">
+        <div class="col-12">
+            <h3 class="inner-sub-name mb-4"> Recently Joined Employee </h3>
+        </div>
+        
+    </div>
+</div>
+
+
+
+
+
+

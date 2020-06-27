@@ -1,0 +1,1 @@
+$pnp.sp.web.lists.getByTitle("PublicationPolicy").items.select("*,File,DocIcon").expand("File").orderBy("Modified", false).top(1).get()

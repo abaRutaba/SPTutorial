@@ -1,0 +1,11 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "isCreatingSolution": true,
+    "environment": "onprem19",
+    "version": "1.9.1",
+    "libraryName": "helloworld-webpart",
+    "libraryId": "9b488dc9-6a9c-445b-9d90-17d9e0847ec4",
+    "packageManager": "npm",
+    "componentType": "webpart"
+  }
+}

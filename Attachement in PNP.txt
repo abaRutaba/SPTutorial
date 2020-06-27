@@ -1,0 +1,74 @@
+<script src="/Style Library/Adib/PNP/jquery-3.3.1.min.js" ></script>
+<script src="/Style Library/Adib/PNP/fetch.min.js" type="text/javascript"></script>
+<script src="/Style Library/Adib/PNP/es6-promise.min.js" type="text/javascript"></script>
+<script src="/Style Library/Adib/PNP/pnp.min.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ getOptions()});
+function getOptions()
+{
+$pnp.sp.web.lists.getByTitle("ReportIncidentFormOptions").items.get().then(function(items)
+{
+var HTML="";
+
+	console.log(items);
+	items.forEach(function(item)
+	{
+		Options = item['Options']
+		isActive = item['isActive']
+		if(isActive)
+		{
+			HTML += '<option value="'+Options+'">'+Options+'</option>';
+		}
+		
+	});
+	$("#options").append(HTML);
+});
+
+}// end of getOptions()
+
+function submitForm()
+{
+	var e = document.getElementById("options");
+	var strUser = e.options[e.selectedIndex].text;
+	//var strUser = e.options[e.selectedIndex].value;
+	var EmpID = document.getElementById("EmpID").value;
+	var Description = document.getElementById("Description").value;
+	var Attachment = document.getElementById("Attachment").files;
+	
+	
+	items = 
+       		 {
+			    Title : _spPageContextInfo.userLoginName, 
+			    EmpID : EmpID,
+			    IncidentType : strUser,
+			    Description : Description
+			  }
+
+	var lst = $pnp.sp.web.lists.getByTitle('ReportIncidentForm');
+	lst.items.add(items).then(function(e){
+	console.log(e.data.ID)
+	if(document.getElementById("Attachment").files.length>0){
+        // main working of attachment
+	lst.items.getById(e.data.ID).attachmentFiles.add(document.getElementById("Attachment").files[0].name, document.getElementById("Attachment").files[0]).then(function() {
+
+
+            console.log("done"); // yah msg aya ga 
+        });
+           	}// end if
+           		console.log("Data submitted!!!!!!!!!!")
+           		alert("Data Submitted Successfully");
+           		$("#EmpID").html('');
+            	$("#Description").html('');
+           		$("#Attachment").html('');
+           		getOptions();
+        });
+	
+	console.log(strUser);
+	
+}
+</script>
+
+
+            <label>Attachment :</label>
+       <input type="file" id="Attachment"/>
+     

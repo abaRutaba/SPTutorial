@@ -1,0 +1,140 @@
+
+<script>
+function getPhotos() {
+ var ml='';
+var files = [], leftFolders, libUrl = '/Departments/'+_spPageContextInfo.webAbsoluteUrl.split("/")[4]+'/Lists/ImageRotatorList', maxItems = 7;
+pnp.sp.web.getFolderByServerRelativeUrl(libUrl).files.select('TimeCreated, ServerRelativeUrl').orderBy('TimeCreated', false).top(maxItems).get()
+    .then(function (rootFiles) {
+        rootFiles.forEach(function (file) {
+            files.push({ Created: file.TimeCreated, Url: file.ServerRelativeUrl, folderId: null });
+        });
+        pnp.sp.web.getFolderByServerRelativeUrl(libUrl).folders.select('ListItemAllFields/ID, ServerRelativeUrl').expand('ListItemAllFields/ID').filter('ItemCount ne 0').get()
+            .then(function (folders) { 
+                leftFolders = folders.length;
+     
+                folders.forEach(function (folder) {
+                    var folderId = folder.ListItemAllFields.ID;
+                    pnp.sp.web.getFolderByServerRelativeUrl(folder.ServerRelativeUrl).files.select('TimeCreated, ServerRelativeUrl').orderBy('TimeCreated', false).top(1).get()
+                        .then(function (folderFiles) {
+                        
+                        
+                       
+                            folderFiles.forEach(function (file) {
+                                files.push({ Created: file.TimeCreated, Url: file.ServerRelativeUrl, folderId: folderId });
+                            });
+                            if (leftFolders == 1 ) {
+                                files.sort(function (b, a) {
+                                    return new Date(a.Created) - new Date(b.Created);
+                                });
+                                files = files.slice(0, maxItems);
+                                files.forEach(function (file) { 
+                                console.log(file);
+                               
+               
+                 ml +='<div class="item-image">';
+                 ml +=' <figure class="item">';
+                 ml +='<a'+(file.folderId?'':'class="item"')+' href="' + (file.folderId?'/Departments/'+_spPageContextInfo.webAbsoluteUrl.split("/")[4]+'/pages/album.aspx?aid='+file.folderId:file.Url) + '" >';
+                 ml +='<img src="'+file.Url+'?RenditionID=9" alt="Image">';
+                 ml +='<figcaption class="caption">';  
+                 ml +='<span style="display: inline-block;">'+ (file.folderId?file.Url.split("/")[5]:file.Url.split("/")[5].split('.')[0]) +'</span><span style="display: inline-block;"><i class="'+(file.folderId?'fa fa-folder-open':'fa fa-image')+'" style="color: #f1f507;font-size: 18px;margin: 0 4px 0 4px;"></i></span>';
+                 ml +='</figcaption>';
+                 ml +='</a>';
+                 ml +='</figure>';
+                 ml +='</div>';
+         
+                                  
+                                    
+                                });
+                                  $("#department-gallery2").html(ml);
+                                    ml="";
+                                ResourceInMypage();
+                                $('#department-gallery2').owlCarousel({
+                                rtl: (_spPageContextInfo.currentUICultureName =='ar-SA'),
+                                    loop: false,
+                                    margin: 15,
+                                    nav: false,
+                                    items: 4,
+                                    dots: true
+
+                                });
+                                $('#department-gallery2').lightGallery({
+                                    selector: '.item',
+                                    thumbnail: true,
+                                    loop: true
+                                });
+                                    //g_photosLoaded.resolve();
+                            }
+                            leftFolders--;
+                        });
+                });
+            });
+        
+    });
+
+
+}
+function ResourceInMypage(){
+
+
+ $('.heading').each(function () {
+        var resKey = $(this).attr('key');
+        if (resKey) {
+            $(this).find("span").text(Resources.Resource[resKey]);
+        }
+    });
+     $('.lablechanger').each(function () {
+        var resKey = $(this).attr('key');
+        if (resKey) {
+            $(this).find("span").text(Resources.Resource[resKey]);
+        }
+    });
+
+ $('.link').each(function () {
+        var resKey = $(this).attr('key');
+        if (resKey) {
+            $(this).text(Resources.Resource[resKey]);
+        }
+    });
+$(':button').each(function () {
+        var resKey = $(this).attr('key');
+        if (resKey) {
+            $(this).val(Resources.Resource[resKey]);
+        }
+    });
+    $(':submit').each(function () {
+        var resKey = $(this).attr('key');
+        if (resKey) {
+            $(this).val(Resources.Resource[resKey]);
+        }
+    });
+
+    
+    $('.link').each(function () {
+        var resKey = $(this).attr('key');
+        if (resKey) {
+            $(this).text(Resources.Resource[resKey]);
+        }
+    });
+
+
+}
+getPhotos();
+</script>
+  <section >
+      <div class="image-gallery blue ">
+
+        <div class="block">
+          <header class="block-header">
+          <a href="AlbumList.aspx" class="link get-set-size" key="viewAll"></a>
+            <h1 class="heading get-set-font" Key="mediaGallery"><i class="fa fa-picture-o"></i> <span></span></h1>
+          </header>
+          <div class="block-body padd">
+            <div class="row" id="" > 
+            <div id="department-gallery2" class="department-gall-widget owl-carousel owl-theme ">
+            </div>      
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>

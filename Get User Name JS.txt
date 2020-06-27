@@ -1,0 +1,4 @@
+web.currentUser.get().then(function(res){ console.log(res.Title); })
+
+
+$pnp.sp.web.currentUser.get().then(function(res){ document.getElementById("UserFeedback").value = res.Title;//_spPageContextInfo.userLoginName; })

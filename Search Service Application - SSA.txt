@@ -1,0 +1,51 @@
+$databaseServer = "SPDB"
+$ServiceAppPoolName = "Search Service Application Search Query WS Pool"
+$AdminAppPoolName = "Search Service Application Search Admin WS Pool"
+$SearchAppPoolAccountName = "treehouse\SPSearchWS"
+$IndexLocation = "D:\Program Files\Microsoft Office Servers\Data THSP16VM01"
+$SearchServiceApplicationName = "Search Service Application"
+$server = "THSP16VM01"
+$DBName = "THSP16VM_SearchService_ServiceDB"
+$SPAppPool = Get-SPServiceApplicationPool -Identity $ServiceAppPoolName -ErrorAction SilentlyContinue
+$SPAdminAppPool = Get-SPServiceApplicationPool -Identity $AdminAppPoolName -ErrorAction SilentlyContinue
+
+if (!$SPAppPool)
+{
+    Write-Host -ForegroundColor Green "Creating Search Application Pool"
+    $SPAppPool = New-SPServiceApplicationPool -Name $ServiceAppPoolName -Account $SearchAppPoolAccountName -Verbose
+} 
+if (!$SPAdminAppPool)
+{
+    Write-Host -ForegroundColor Green "Creating Search Application Pool"
+    $SPAdminAppPool = New-SPServiceApplicationPool -Name $AdminAppPoolName -Account $SearchAppPoolAccountName -Verbose
+} 
+Write-Host "Setting up Search"
+ 
+Start-SPEnterpriseSearchServiceInstance $server
+Start-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance $server
+ 
+$searchApp = New-SPEnterpriseSearchServiceApplication -Name $SearchServiceApplicationName -ApplicationPool $ServiceAppPoolName -AdminApplicationPool $AdminAppPoolName -DatabaseServer $databaseServer -DatabaseName $DBName
+$searchInstance = Get-SPEnterpriseSearchServiceInstance $server
+ 
+$ssa = Get-SPEnterpriseSearchServiceApplication
+ 
+Write-Host "Setup Topology"
+$ssa.ActiveTopology
+$clone = $ssa.ActiveTopology.Clone()
+ 
+New-SPEnterpriseSearchAdminComponent –SearchTopology $clone -SearchServiceInstance $searchInstance
+New-SPEnterpriseSearchContentProcessingComponent –SearchTopology $clone -SearchServiceInstance $searchInstance
+New-SPEnterpriseSearchAnalyticsProcessingComponent –SearchTopology $clone -SearchServiceInstance $searchInstance
+New-SPEnterpriseSearchCrawlComponent –SearchTopology $clone -SearchServiceInstance $searchInstance
+New-SPEnterpriseSearchIndexComponent –SearchTopology $clone -SearchServiceInstance $searchInstance -RootDirectory $IndexLocation
+New-SPEnterpriseSearchQueryProcessingComponent –SearchTopology $clone -SearchServiceInstance $searchInstance
+ 
+$clone.Activate()
+ 
+$ssa | get-SPEnterpriseSearchAdministrationComponent |  set-SPEnterpriseSearchAdministrationComponent -SearchServiceInstance  $searchInstance
+ 
+ 
+Write-Host "Setup Proxy"
+$searchAppProxy = New-SPEnterpriseSearchServiceApplicationProxy -Name "$SearchServiceApplicationName Proxy" -SearchApplication $SearchServiceApplicationName
+ 
+Write-Host "Done"

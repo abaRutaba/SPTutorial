@@ -1,0 +1,102 @@
+<input type="file" id="file-input" />
+<input type="button" onclick="pnpAttach()" value="Upload Files" />
+
+<table>
+<thead>
+<th>File Name</th>
+<th>Action</th>
+</thead>
+<tbody id="Test">
+
+</tbody>
+</table>
+
+<script>
+
+var printFile = false;
+var fileNameArr = [];
+var addId = ""
+var fileInfos = [];  
+var filesToAdd = [];
+
+$(document).ready(function(){
+    $("#file-input").change(function(e) {
+    blob();
+    prinFileFunc();
+// Following function shows files on browser
+        function prinFileFunc(){
+            if(printFile){
+            
+                printFile=false;
+                var lastFile = fileInfos.length-1;
+                var fileName = fileNameArr[lastFile];
+                fileName = fileName.trim();
+                
+                var newFile = filesToAdd[lastFile].name;
+				
+				var copyfile = fileName;
+                var onclick= "('"+copyfile+"','"+newFile+"')";
+                $('#Test').append('<tr id="id'+fileName+'"><td>'+fileName+'</td><td><a href="#" onclick="removeFile(this)">X</a></td></tr>');
+               
+            }else{
+                setTimeout(function() { prinFileFunc()}, 250);
+            }
+        }
+        
+    });
+
+});
+
+
+// Following function removes files
+function removeFile(event){
+
+    newFile = event.offsetParent.parentElement.rowIndex;
+    copyfile =event.offsetParent.parentElement.id;
+    var ind = fileNameArr.indexOf(newFile-1);
+    fileInfos.splice(newFile-1, 1);
+    fileNameArr.splice(newFile-1, 1);
+	filesToAdd.splice(newFile-1, 1);
+    $("#"+copyfile).remove();
+}
+// Following function inserting files in a folder of document library i.e(Lib/folderName)
+function pnpAttach(){
+
+for(i=0;i<filesToAdd.length;i++)
+{
+	$pnp.sp.web.getFolderByServerRelativeUrl("Uploader/rough").files.add(filesToAdd[i].name, filesToAdd[i], true)
+	.then(function(e)
+	{
+				
+	});
+
+}
+}
+
+  
+
+//Following function removing dot(.) from filename and adding files in filesToAdd Array
+function blob() {  
+      var input = document.getElementById("file-input");  
+          var file = input.files[0];
+          filesToAdd.push(file);
+          var reader = new FileReader();  
+          reader.onload = (function(file) {  
+              return function(e) {  
+                var n = file.name.trim();
+                n = n.replace(/[&\/\\#,+()$~%.\s'":*?<>{}]/g, '')
+                fileInfos.push({  
+                      "name": file.name,  
+                      "content": e.target.result  
+                  });  
+                  
+                  fileNameArr.push(n);
+                  printFile = true;
+               	  
+               }  
+          })(file);  
+          reader.readAsArrayBuffer(file);  
+     
+     
+}
+</script>

@@ -1,0 +1,37 @@
+Add-PSSnapin Microsoft.SharePoint.PowerShell  
+  
+function CreateCustomList($siteCollectionUrl, $listName) {  
+  
+    $spWeb = Get-SPWeb -Identity $siteCollectionUrl  
+    $spTemplate = $spWeb.ListTemplates["Custom List"]  
+    $spListCollection = $spWeb.Lists  
+    $spListCollection.Add($listName, $listName, $spTemplate)  
+    $path = $spWeb.url.trim()  
+    $spList = $spWeb.GetList("$path/Lists/$listName")  
+ 
+    #adding the field type(Text) to the list for (icon column) 
+    $spFieldType = [Microsoft.SharePoint.SPFieldType]::Text  
+    $spList.Fields.Add("Icon", $spFieldType, $false)  
+ 
+    #adding the field type(Text) to the list for (link column) 
+    $spFieldType = [Microsoft.SharePoint.SPFieldType]::Text
+    $spList.Fields.Add("Link", $spFieldType, $false)
+
+   
+   #sharepoint powershell - create lookup field
+    $ChildLookupColumn = $spList.Fields.AddLookup("LookupChild",$spList.id,$False)
+    $ChildLookupColumn = $spList.Fields["LookupChild"]
+ 
+    #Setup lookup Field property
+    $ChildLookupColumn.LookupField = $spList.Fields["Title"]
+    #$ChildLookupColumn.AllowMultipleValues=$true 
+
+    $ChildLookupColumn.update()
+    $spList.Update()  
+}  
+  
+  
+$siteCollectionUrl = "http://10.20.2.218/"  
+$listName = "LeftMenu"  
+  
+CreateCustomList $siteCollectionUrl $listName 

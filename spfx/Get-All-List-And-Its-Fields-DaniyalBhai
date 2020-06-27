@@ -1,0 +1,101 @@
+//  install node module  in terminal     npm i @pnp/sp
+
+ 
+
+// add imports at top
+import { sp } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists/web";
+import "@pnp/sp/items/list";
+import "@pnp/sp/fields";
+
+ 
+
+// add dropdowncontrols for propertypane
+import {
+  IPropertyPaneConfiguration,
+  PropertyPaneTextField,
+  PropertyPaneDropdown,     //  This one
+  IPropertyPaneDropdownOption  //  this one validate structure for dropdown  { key:   text:  }
+} from "@microsoft/sp-property-pane";
+
+ 
+
+// This is your webpart properties   
+export interface IGraphWebPartProps {
+  description: string;
+  lists: IPropertyPaneDropdownOption[];   // collection for dorpdown
+  selectedList: string;   
+  fields: IPropertyPaneDropdownOption[];   //collection for dropdown
+  selectedField: string;
+}
+
+ 
+
+
+public async loadLists() {
+    let data: any = await sp.web.lists.filter('BaseTemplate eq 100 and Hidden eq false').get();
+    this.properties.lists = data.map(row => ({ key: row.Id, text: row.Title }));
+  }
+
+ 
+
+  public async loadFields(id: string) {
+    let data: any = await sp.web.lists.getById(id).fields.filter('Hidden eq false and ReadOnlyField eq false').get();
+    this.properties.fields = data.map(row => ({ key: row.Id, text: row.Title }));
+ 
+  }
+
+ 
+
+  protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: any, newValue: any): void {
+    if (propertyPath === "selectedList") {
+      super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
+      this.loadFields(this.properties.selectedList);
+    }
+  }
+
+ 
+
+  @override
+  public async onInit(): Promise<void> {
+
+ 
+
+// To connect pnp.sp with sharepoint
+    sp.setup({
+      spfxContext: this.context
+    });
+
+ 
+
+  // custom fucntion to load list data
+    this.loadLists();
+}
+
+ 
+
+ 
+
+ 
+
+ groupFields: [
+           //   added dropdown controls in property pane
+                PropertyPaneDropdown('selectedList', {
+                  label: 'Select List',
+                  options: this.properties.lists
+
+ 
+
+                }),
+                PropertyPaneDropdown('selectedField', {
+                  label: 'Select Field',
+                  options: this.properties.fields
+                }),
+
+ 
+
+                PropertyPaneTextField("description", {
+                  label: strings.DescriptionFieldLabel,
+                }),
+              ],

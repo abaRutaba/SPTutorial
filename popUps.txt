@@ -1,0 +1,244 @@
+
+<script>
+// popup for downlaoding documnet
+function modalOpen(){
+
+$("#modalMainCarousel").modal("show");
+$("#service1").text("GISD Service Name and it’s Icon");
+$("#paraOne").text("This will be a form that will be downloaded/filled by the employee /end user and submitted to gisdservicerequest@adib.com");
+
+$pnp.sp.web.lists.getByTitle("popLibrary").items.select("*").expand("File").orderBy("ID", false).top(1).get().then(function(items)
+{
+	console.log(items[0].File.Name);
+	$("#item").append('<a href="'+items[0].File.ServerRelativeUrl+'" style="color:red;">'+items[0].File.Name+'</a>');
+});
+
+}
+
+
+
+
+function modalOpen2()
+{
+$("#modalMainCarouse2").modal("show");
+
+var Title="", description="";
+	$pnp.sp.web.lists.getByTitle("GISDAnnouncements").items.select("*").orderBy("ID",false).top(1).get().then(function(items)
+	{
+		console.log(items);
+		//publishingCall(ID)
+		ID = publishingCall(items[0].ID);
+		
+		//Title = items[0].Title;
+		//description = items[0].description;
+		$("#service2").text("GISD Service Name and it’s Icon");
+		$("#para2Title").append('<b>'+items[0].Title+'</b>');
+		$("#para2").text(items[0].Description);
+	});
+
+}
+
+function publishingCall(id)
+{	
+    $pnp.sp.web.lists.getByTitle("GISDAnnouncements").items.getById(id).select("PublishingPageIcon").fieldValuesAsHTML.get().then(function(e){
+    var str = e.PublishingPageIcon;
+    str= str.substring(str.indexOf("src")+5, str.indexOf("style")-2);
+    $("#AnnouncmentDiv").html('<img src="'+str+'" id="ImgId'+id+'" alt="">');
+
+    });
+   
+}
+
+
+function modalOpen3()
+{
+$("#modalMainCarouse3").modal("show");
+document.getElementById("UserQuestion").value = _spPageContextInfo.userLoginName;
+}
+function SubmitQuestion(){
+var Title="", description="";
+
+var UserQuestion = document.getElementById("UserQuestion").value;
+
+var Subj1 = document.getElementById("Subject1").value;
+var Question = document.getElementById("AskCISOQuestion").value;
+console.log("Subj1 = "+Subj1);
+console.log("Question = "+Question);
+		items = 
+       		 {
+			    Subject : Subj1 , 
+			    Question : Question ,
+			    User : UserQuestion 
+			  }
+			   $pnp.sp.web.lists.getByTitle('AskCISO').items.add(items).then(function(e){console.log("YES")});
+}
+
+
+function modalOpen4()
+{
+$("#modalMainCarouse4").modal("show");
+document.getElementById("UserFeedback").value = _spPageContextInfo.userLoginName;
+}
+
+
+function SubmitFeedback(){
+var Title="", description="";
+
+var UserFeedback = document.getElementById("UserFeedback").value;
+
+var Subj2 = document.getElementById("Subject2").value;
+var Feedback = document.getElementById("Feedback").value;
+console.log("Subj2 = "+Subj2);
+console.log("Feedback = "+Feedback);
+		items = 
+       		 {
+			    Subject : Subj2 , 
+			    Feedback : Feedback,
+			    User : UserFeedback 
+			  }
+			   $pnp.sp.web.lists.getByTitle('Feedback').items.add(items).then(function(e){console.log("YES YES")});
+}
+
+</script>
+<div>
+<a href="Javascript:void(0)" id="Div1" onclick="modalOpen()" style="color:white"><b>Read More</b></a>
+<a href="Javascript:void(0)" id="Div2" onclick="modalOpen2()" style="color:white"><b>Read More</b></a>
+<a href="Javascript:void(0)" id="Div2" onclick="modalOpen3()" style="color:white"><b>Read More</b></a>
+<a href="Javascript:void(0)" id="Div2" onclick="modalOpen4()" style="color:white"><b>Read More</b></a>
+
+</div>
+
+
+
+<!-- Modal popup for downlaoding documnet -->
+ <div class="modal fade" id="modalMainCarousel" role="dialog">
+  <div class="modal-dialog">
+  
+    <!-- Modal content-->
+    <div class="modal-content gsid-top-popup">
+      <div class="modal-header">  <button type="button" class="close" data-dismiss="modal">&times;</button>
+    
+        <h4 class="modal-title" id="modalOneHeading"><span class="icon-Icon-150px-14" style="color:black;"></span><span id="service1"></span></h4>
+      </div>
+     
+      <div class="modal-body clearfix">
+        <div class="col-md-8 col-sm-12">
+        <div id="item" style="color:black;"></div>
+          <p id="paraOne" style="color:black"></p>
+        </div>
+     </div>
+   
+    </div>
+    
+  </div>
+</div>
+<!--Modal popup for downlaoding documnet End--> 
+
+
+<!-- Modal GISD Announcement-->
+ <div class="modal fade" id="modalMainCarouse2" role="dialog">
+  <div class="modal-dialog">
+  
+    <!-- Modal content-->
+    <div class="modal-content gsid-top-popup">
+      <div class="modal-header">  <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <span class="icon-Icon-150px-01"></span>
+        <h4 class="modal-title"><span class="icon-Icon-150px-13" style="color:black;"></span><span id="service2"></span></h4>
+      </div>
+      <div class="modal-body clearfix">
+        <div class="col-md-4 col-sm-12">
+          <p id="para2Title" style="color:black;"></p>
+		</div>
+
+        <div class="col-md-8 col-sm-12">
+          <p id="para2" style="color:black;"></p>
+        </div>
+        <div class="col-md-4 col-sm-12" id="AnnouncmentDiv">
+         </div>
+
+
+      </div>
+   
+    </div>
+    
+  </div>
+</div>
+<!--Modal GISD Announcement End-->
+
+
+
+
+
+
+
+<!-- Modal Ask CISO -->
+ <div class="modal fade" id="modalMainCarouse3" role="dialog">
+  <div class="modal-dialog">
+  
+    <!-- Modal content-->
+    <div class="modal-content gsid-top-popup">
+      <div class="modal-header">  <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <span class="icon-Icon-150px-01"></span>
+         <h4 class="modal-title"><span class="icon-Icon-150px-12" style="color:black;"></span><span id="service3"></span></h4>
+      </div>
+      <div class="modal-body clearfix">
+        <input type="text" id="UserQuestion" disabled>
+        <div class="col-md-8 col-sm-12">
+        <p style="color:black;"><b>Subject</b></p>
+        <input type="text" id="Subject1"/>
+		</div>
+        <div class="col-md-12">
+        	<p style="color:black;"><b>Question</b></p>
+    		<p><textarea rows="4" cols="50" id="AskCISOQuestion" style="color:black;"></textarea></p>
+  		</div>
+		<div class="col-md-12">
+        	<input type="button" Value="Submit" onClick="SubmitQuestion()">
+  		</div>
+
+
+      </div>
+   
+    </div>
+    
+  </div>
+</div>
+<!--Modal Ask CISO End-->
+
+
+
+
+
+<!-- Modal Feedback -->
+ <div class="modal fade" id="modalMainCarouse4" role="dialog">
+  <div class="modal-dialog">
+  
+    <!-- Modal content-->
+    <div class="modal-content gsid-top-popup">
+      <div class="modal-header">  <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <span class="icon-Icon-150px-01"></span>
+         <h4 class="modal-title"><span class="icon-Icon-150px-12" style="color:black;"></span><span id="service4"></span></h4>
+      </div>
+      <div class="modal-body clearfix">
+        <input type="text" id="UserFeedback" disabled>
+        <div class="col-md-8 col-sm-12">
+        <p style="color:black;"><b>Subject</b></p>
+        <input type="text" id="Subject2"/>
+		</div>
+        <div class="col-md-12">
+        	<p style="color:black;"><b>Feedback</b></p>
+    		<p><textarea rows="4" cols="50" id="Feedback" style="color:black;"></textarea></p>
+  		</div>
+		<div class="col-md-12">
+        	<input type="button" Value="Submit" onClick="SubmitFeedback()">
+  		</div>
+
+
+      </div>
+   
+    </div>
+    
+  </div>
+</div>
+<!--Modal Feedback End-->
+
+

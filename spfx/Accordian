@@ -1,0 +1,11 @@
+displayGroupsAsAccordion: true,
+        groups: [
+          {
+            groupName: "Datasource configration",
+            isCollapsed: true,
+            groupFields: [
+              PropertyPaneTextField('description', {
+                label: strings.DescriptionFieldLabel,
+                disabled:this.properties.ISEnable,
+                onGetErrorMessage: this.validateDescription.bind(this)
+              }),

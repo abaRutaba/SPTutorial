@@ -1,0 +1,40 @@
+
+//---------- Script to convert date into Arabic Starts --------------------
+function convertToArabicDate(ArabicDate)
+{
+debugger
+	//var date = new Date('2016-12-04'); 
+	console.log(ArabicDate);
+	var months = ["?????", "??????", "????", "?????", "????", "?????",
+	  "?????", "?????", "??????", "??????", "??????", "??????"
+	];
+	var ArDays = ["????", "??????", "????????", "???????", "??????", "??????", "?????"];
+	var numericday= ['?','?','?','?','?','?','?','?','?','?'];
+	debugger
+	//var delDateString = date.getDate().toString().toArabicDigits() + ' ' + months[date.getMonth()] + ' '+ date.getFullYear().toString().toArabicDigits() ;	
+	//var delDateString =  months[date.getMonth()] + ' '+ date.getFullYear().toString().toArabicDigits() ;	
+//	var delDateString =  days[date.getDay()]+' '+ months[date.getMonth()] +' '+ date.getDate().toString().toArabicDigits() + ', '+ date.toString().toArabicDigits() ;	
+
+	delDateString = ArDays[(ArabicDate.getDay())-1] + ' ' + months[ArabicDate.getMonth()] +' '+ ArabicDate.getDate().toString().toArabicDigits() + '? ' + ArabicDate.getFullYear().toString().toArabicDigits() ;
+	console.log(delDateString); // Outputs ????, 4 ??????, 2016 
+	debugger;
+	return delDateString;
+}
+
+String.prototype.toArabicDigits= function(){
+ var id= ['?','?','?','?','?','?','?','?','?','?'];
+ return this.replace(/[0-9]/g, function(w){
+  return id[+w]
+ });
+}
+//---------- Script to convert date into Arabic Ends -------------------- 
+//---------- Script to get Date in English Starts -----------------------
+function GetEngDate(EngDate)
+{
+	var TheDate='';
+	Days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+	Months=["January","February","March","April","May","June","July","August","September","October","November","December"]
+	
+	TheDate = Days[(EngDate.getDay())-1] + ' ' + Months[(EngDate.getMonth())] + ' ' + EngDate.getDate() +', '+ EngDate.getFullYear();
+	return TheDate;
+}    

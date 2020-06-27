@@ -1,0 +1,10 @@
+function publishingCall(id)
+{	
+    $pnp.sp.web.lists.getByTitle("questionOfMonth3").items.getById(id).select("PublishingPageIcon").fieldValuesAsHTML.get().then(function(e){
+    var str = e.PublishingPageIcon;
+    str= str.substring(str.indexOf("src")+5, str.indexOf("style")-2);
+    $("#imgDDiv").append('<img src="'+str+'" id="ImgId'+id+'" alt="">');
+
+    });
+   
+}

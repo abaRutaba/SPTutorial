@@ -1,0 +1,16 @@
+function SliderHeadingAndPicture()
+{
+var text="", URL="";
+$pnp.sp.web.lists.getByTitle("HR_SliderImages").items.select('*,FileRef').filter("Enable eq 1").orderBy("ID",false).top(1).get().then(function (item) {
+    
+	       	console.log("ITEM....",item)
+            text = item[0].SliderText;
+            URL = item[0].FileRef;
+            console.log("SliderText = ",text)
+            console.log("FileRef = ",URL)
+          
+		$('#SliderHeading').text(text);
+		$('#SliderImg').css("background-image", "url("+URL+")");
+
+        });
+}

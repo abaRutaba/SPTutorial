@@ -1,0 +1,71 @@
+<script>
+ $(document).ready(function(){  
+   
+          
+        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', GetCurrentUsername);
+                        
+    });
+
+  function GetCurrentUsername()
+{
+	debugger
+	/*clientContext = new SP.ClientContext.get_current();
+
+	var peopleManager = new SP.UserProfiles.PeopleManager(clientContext);	
+
+	var profilePropertyNames = ["PreferredName", "PictureURL", "AboutMe", "TechNetProfile", "AccountName",
+         "Department", "CellPhone" , "SPS-Skills" , "WorkEmail" , "UserName" , "SPS-HireDate" , "WorkPhone", "Title"];
+
+	var userProfilePropertiesForUser = new SP.UserProfiles.UserProfilePropertiesForUser(clientContext,  _spPageContextInfo.userLoginName, profilePropertyNames);
+            userProfileProperties = peopleManager.getUserProfilePropertiesFor(userProfilePropertiesForUser);
+clientContext.executeQueryAsync(onSucceess, onFail);
+*/
+
+    var workEmail = "";  
+    var userDisplayName = "";  
+    var JobTitle = "";  
+    var Picture = "";  
+
+    $.ajax({  
+
+        url: _spPageContextInfo.webAbsoluteUrl + "/_api/SP.UserProfiles.PeopleManager/GetMyProperties",  
+        headers: { Accept: "application/json;odata=verbose" },  
+        success: function (data) {  debugger
+            try {  
+                //Get properties from user profile Json response  
+                userDisplayName = data.d.DisplayName;  
+                AccountName = data.d.AccountName;  
+                var properties = data.d.UserProfileProperties.results;  
+                for (var i = 0; i < properties.length; i++) {                    
+
+                    if (properties[i].Key == "SPS-JobTitle") {  
+                        JobTitle = properties.Value;  
+                    }  
+                    if (properties.Key == "PictureURL") {  
+                        Picture = properties.Value;  
+                    }  
+
+                }  
+                console.log("userDisplayName = ", userDisplayName);  
+                 console.log("JobTitle  = ", JobTitle);  
+                 console.log("Picture  = ",Picture);  
+                $('#userDisplayName').html(userDisplayName);  
+                $('#JobTitle').html(JobTitle);  
+                $('#Picture').html(Picture);  
+               
+
+            } catch (err2) {  
+                //alert(JSON.stringify(err2));  
+            }  
+        },  
+        error: function (jQxhr, errorCode, errorThrown) {  
+            alert(errorThrown);  
+        }  
+    });  
+}
+
+
+</script>
+userDisplayName = <span id="userDisplayName"></span>
+JobTitle = <span id="JobTitle"></span>
+Picture = <span id="Picture"></span>

@@ -1,0 +1,29 @@
+if(dataResult)
+this.loadPage();
+
+
+public loadPage()
+{
+  
+      sp.web.lists.getByTitle("Users").items.select("Title").top(2).getPaged()
+      .then(p => {
+         debugger;
+         console.log(JSON.stringify(p.results, null, 4));
+         //Pagination+2;
+        PObject=p;
+        dataResult=false;
+    });
+  
+}
+public loadmore()
+{
+  if (PObject.hasNext) {
+   // dataResult=true;
+    PObject.getNext().then(p2 => {
+  debugger;
+  console.log(p2);
+  PObject=p2;
+          console.log(JSON.stringify(p2.results, null, 4));
+      });
+  }
+}

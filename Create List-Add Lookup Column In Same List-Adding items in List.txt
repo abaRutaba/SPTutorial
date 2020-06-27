@@ -1,0 +1,64 @@
+Add-PSSnapin Microsoft.SharePoint.PowerShell  
+  
+function CreateCustomList($siteCollectionUrl, $listName) {  
+  
+    $spWeb = Get-SPWeb -Identity $siteCollectionUrl  
+    $spTemplate = $spWeb.ListTemplates["Custom List"]  
+    $spListCollection = $spWeb.Lists  
+    $spListCollection.Add($listName, $listName, $spTemplate)  
+    $path = $spWeb.url.trim()  
+    $spList = $spWeb.GetList("$path/Lists/$listName")  
+ 
+    #adding the field type(Text) to the list for (icon column) 
+    $spFieldType = [Microsoft.SharePoint.SPFieldType]::Text  
+    $spList.Fields.Add("Icon", $spFieldType, $false)  
+ 
+    #adding the field type(Text) to the list for (link column) 
+    $spFieldType = [Microsoft.SharePoint.SPFieldType]::Text
+    $spList.Fields.Add("Link", $spFieldType, $false)
+
+   #Lookup
+   #sharepoint powershell - create lookup field
+    $ChildLookupColumn = $spList.Fields.AddLookup("Parent",$spList.id,$False)
+    $ChildLookupColumn = $spList.Fields["Parent"]
+ 
+    #Setup lookup Field property
+    $ChildLookupColumn.LookupField = $spList.Fields["Title"]
+    #$ChildLookupColumn.AllowMultipleValues=$true 
+
+    $array = 
+    ("GSID Home","icon-Icon-150px-09","#","0"),
+    ("GSID About us","icon-Icon-150px-16","#","0"),
+    ("Services Forms","icon-Icon-150px-10","#","0"),
+    ("Newsletter","icon-Icon-150px-01","#","0"),
+    ("Knowledge Hub","icon-Icon-150px-11","#","0"),
+    ("Contact us","icon-Icon-150px-24","#","0"),
+    ("Newsletter Lorem Ipsum is simply 01","","#","4"),
+    ("Newsletter Lorem Ipsum is simply 02","","#","4"),
+    ("Newsletter Lorem Ipsum is simply 03","","#","4"),
+    ("Newsletter Lorem Ipsum is simply 04","","#","4"),
+    ("Newsletter Lorem Ipsum is simply 05","","#","4")
+    
+    for($i=0; $i -lt $array.length; $i++)
+    {
+        
+            $newItem = $spList.items.add()    
+            $newitem["Title"] = $array[$i][0]
+            $newitem["Icon"] = $array[$i][1]   
+            $newitem["Link"] = $array[$i][2]    
+            $newitem["Parent"] = $array[$i][3]
+            $newitem.update()
+        
+    }
+
+    
+    $newitem.update()  
+    $ChildLookupColumn.update()
+    $spList.Update()  
+}  
+  
+  
+$siteCollectionUrl = "http://10.20.2.218/"  
+$listName = "LeftMenu"  
+  
+CreateCustomList $siteCollectionUrl $listName 

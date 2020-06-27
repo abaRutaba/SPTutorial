@@ -1,0 +1,16 @@
+function stripHtml(html)
+{
+   var tmp = document.createElement("DIV");
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || "";
+}
+// now calling function..
+var Newshtml='', itemCount=0, length=0,NewsDate="",Newstext ="",img="";
+$pnp.sp.web.lists.getByTitle("HR_News").items.filter("Enable eq 1").orderBy("ID",false).top(4).get().then(function(e) {
+  debugger
+	e.forEach(function(item)
+    {  	
+
+      Newstext = stripHtml(item['Heading']);
+      console.log("Newstext = ",Newstext);
+    });});

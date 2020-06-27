@@ -1,0 +1,12 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "version": "1.10.0",
+    "libraryName": "properties-webpart",
+    "libraryId": "561ad8a6-6b46-4d23-aae4-cceb7e1c0767",
+    "environment": "spo",
+    "packageManager": "npm",
+    "isCreatingSolution": false,
+    "isDomainIsolated": true,
+    "componentType": "webpart"
+  }
+}

@@ -1,0 +1,23 @@
+ PropertyPaneChoiceGroup('fileType', {
+                label: "Select View",
+                options: [
+                  { key: 'Two', text: 'Two Column',
+                    imageSrc: Col2,
+                    imageSize: { width: 40, height: 40 },
+                    selectedImageSrc: Col2
+                  },
+                  { key: 'Listview', text: 'List view',
+                    imageSrc: listcol,
+                    imageSize: { width: 40, height: 40 },
+                    selectedImageSrc: listcol
+                  },
+                  { key: 'Slider', text: 'Slider',
+                    imageSrc: Slidercol,
+                    imageSize: { width: 40, height: 40 },
+                    selectedImageSrc: Slidercol
+                  }
+                ]
+              })
+
+
+

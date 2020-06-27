@@ -1,0 +1,95 @@
+/* 1) 1 level gallery i.e. fetches photos only from 1 level folders that are on root dir (not photos on root dir) 
+2) shows thumbnail on folder
+3) make new content type for thumbnail
+4) thumbnail is not from folder
+5) include all the libraries 
+*/
+
+<script src="/Style Library/SSA/SharedJS/SSA-GlobalVars-Initializer.js"></script>
+<script type="text/javascript">
+    var GalleryListItems, folder='',
+        rowLimit = 0;//ADSSAGlobalVariables.MaxHomePageItems,
+    $(document).ready(function(){ 
+   		var urlParams = new URLSearchParams(window.location.search);
+   		if(urlParams.get('folder'))
+   		{
+   			console.log(urlParams.get('folder'))
+   			folder = urlParams.get('folder');
+   			SP.SOD.executeFunc('sp.js', 'SP.ClientContext', getFilesInFolder);
+   		}
+   		else{
+		SP.SOD.executeFunc('sp.js', 'SP.ClientContext', GetGallery);
+		}
+          
+    });
+                    
+     function GetGallery() {
+     
+        var clientContext = new SP.ClientContext(_spPageContextInfo.siteServerRelativeUrl+ADSSAGlobalVariables.MediaCenterSiteUrls.Gallery);
+        var listName = ADSSAGlobalVariables.MediaCenterListsName.PhotoGallery;
+        var targetList = clientContext.get_web().get_lists().getByTitle(listName);
+        var caml = new SP.CamlQuery();
+        caml.set_viewXml("<View><Query><OrderBy><FieldRef Name='Created'  Ascending='False' /></OrderBy></Query><RowLimit>100</RowLimit></View>");
+        GalleryListItems= targetList.getItems(caml);
+        clientContext.load(GalleryListItems);
+        clientContext.executeQueryAsync(onQuerySuccessGallery, onQueryFailedGallery);
+    } 
+
+ 
+
+    function onQueryFailedGallery(sender, args) {
+        console.log('Request failed. \nError: ' + args.get_message() + '\nStackTrace: ' + args.get_stackTrace());
+    } 
+    var FolderHTML='';
+    function onQuerySuccessGallery() {
+       var listEnumerator = GalleryListItems.getEnumerator();
+        while (listEnumerator.moveNext()) 
+        {    
+            var item = listEnumerator.get_current();
+            console.log(item);
+            console.log(item.get_item("Title"))
+            console.log("thumbnail = ",item.get_item("FolderImageURL").$2_1)
+            console.log(item.get_item("FileRef"));            
+            FolderHTML += '<h5><a href="/MediaCenter/Pages/PhotoGallery2.aspx?folder='+item.get_item("FileRef")+'"><img src="'+item.get_item("FolderImageURL").$2_1+'"/>'+item.get_item("Title")+'</a></h5>';
+            
+        }
+        $('#FolderShow').html(FolderHTML);
+        FolderHTML ='';
+    }
+    
+        //...............................................
+    
+     function getFilesInFolder() { 
+        var context = new SP.ClientContext(_spPageContextInfo.siteServerRelativeUrl+ADSSAGlobalVariables.MediaCenterSiteUrls.Gallery);
+        var listName = ADSSAGlobalVariables.MediaCenterListsName.PhotoGallery;
+        var targetList = context.get_web().get_lists().getByTitle(listName);
+        var web = context.get_web();
+        var folder2= web.getFolderByServerRelativeUrl(folder);
+        files = folder2.get_files();
+        console.log(files)
+        context.load(files);
+
+        context.executeQueryAsync(OnSuccess, OnFailure);
+    }
+    
+    
+    function OnSuccess()
+    {                 
+        var listItemEnumerator = files.getEnumerator();
+            while (listItemEnumerator.moveNext()) {
+                var fileUrl = listItemEnumerator.get_current().get_serverRelativeUrl(); 
+                console.log(fileUrl);
+               // FolderHTML += '<h5><img src="'+fileUrl+'"/>'+item.get_item("Title")+'</a></h5>';
+                FolderHTML += '<h5><a><img src="'+fileUrl+'"/>'+listItemEnumerator.get_current().get_title()+'</a></h5>';
+            }
+            $('#FolderShow').html(FolderHTML);
+        FolderHTML ='';                                         
+    }
+
+    function OnFailure(sender, args) {
+        console.log("Failed. Message:" + args.get_message());
+    }
+    //...............................................
+    
+    </script>           
+<div id="FolderShow"></div>

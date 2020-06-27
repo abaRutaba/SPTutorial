@@ -1,0 +1,2 @@
+pubDate = new Date(pubDate).format('MMMM yyyy, dd');
+// March 2020, 09

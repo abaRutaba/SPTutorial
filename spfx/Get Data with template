@@ -1,0 +1,22 @@
+//  Create some html template
+const template1 = row => (
+    `<li><span>${row.col1}</span>${row.col2}</li>`
+);
+ 
+//  Create some other html template
+const template1 = row => (
+    `<li>${row.col1}   ${row.col2}</li>`
+);
+ 
+// High Order Function - Templating Engine
+const use = template => {
+    return function reducer(last, curr) {
+        return last + template(curr);
+    }
+};
+ 
+//  Data collection from lists
+var dataRows = [{ col1: "col1 value", col2: "col2 value" }, { col1: "col12 value", col2: "col22 value" }, { col1: "col13 value", col2: "col23 value" }];
+ 
+//  Change template in "use" function
+var html = dataRows.reduce(use(template1), "");

@@ -1,0 +1,14 @@
+npm install sp-pnp-js –save
+
+import pnp, { List, ListEnsureResult, Item, ItemAddResult, ItemUpdateResult} from "sp-pnp-js";
+
+
+ pnp.sp.web.lists.ensure(this.properties.description).then((ler: ListEnsureResult) => {
+  if (ler.created) {
+      alert("My List was created!");
+      //do some awesome stuff with the list
+  }
+  else{
+    alert("My List already existed!");
+  }
+});

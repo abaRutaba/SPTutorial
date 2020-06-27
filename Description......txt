@@ -1,0 +1,25 @@
+if(item['Heading']==null)
+		{Newstext="-";}
+		else
+		{
+		Newstext = stripHtml(item['Heading']);
+		if(Newstext.length>180)
+          {
+           	Newstext = Newstext.substring(0,210)+"...";  
+           	Listresult= $(item['Heading']).find('img').first().attr('src');
+			Listresult==null?Listimg="":Listimg=Listresult;
+		
+          }
+		}
+
+
+
+
+//rich text
+function stripHtml(html)
+{
+   var tmp = document.createElement("DIV");
+   tmp.innerHTML = html;
+   
+   return tmp.textContent || tmp.innerText || "";
+}

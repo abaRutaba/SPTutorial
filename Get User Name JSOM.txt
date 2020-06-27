@@ -1,0 +1,33 @@
+ $(document).ready(function(){  
+   
+          
+        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', GetCurrentUsername);
+                        
+    });
+
+  function GetCurrentUsername()
+{
+	debugger
+	var ctxt = new SP.ClientContext.get_current(_spPageContextInfo.siteServerRelativeUrl+ADSSAGlobalVariables.DepartmentPageComponentsSiteUrls.UserProfile);
+	this.website = ctxt.get_web();
+	this.currentUser = this.website.get_currentUser();
+	ctxt.load(this.currentUser);
+	ctxt.executeQueryAsync(onSucceess, onFail);
+}
+
+
+
+function onSucceess()
+ {
+ debugger;
+var username = currentUser.get_title(); 
+console.log(username);
+$("#user").html(username)
+ }
+
+
+
+function onFail(sender, args)
+{debugger
+alert('request failed ' + args.get_message() + '\n'+ args.get_stackTrace());
+}

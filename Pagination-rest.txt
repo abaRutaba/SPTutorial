@@ -1,0 +1,286 @@
+<script type="text/javascript">
+
+var NewsListSiteURL = window.location.protocol + "//" + window.location.host + "//Admin"; 
+var NewsListName = "News";
+var NewsListColumns = "Title,Id,TitleAr,DescriptionEn,DescriptionAr,Image,Date,ID";
+var NewsListPageSize = 5;
+var NewsListOrderBy = "ID";
+var NewsListAscending = false;
+
+var NewsListObj1; 
+var NewsListCurrentPage = 1;
+var NewsListpages = 0;
+
+$(document).ready(function () {
+
+    getPages(NewsListName, NewsListPageSize, NewsListOrderBy, NewsListAscending , generatePagination, NewsListColumns);
+
+});
+
+function generatePagination(obj) {
+    NewsListObj1 = obj;
+    NewsListpages = obj.getNextUrls().length + 1;
+    var pageHtml = "";
+    var contentHtml = "";
+    var pre = "<li class='left-arrow'> <a id='btnBack' onClick='fetchUrl(\"p\"); return false;'><</a> </li>";
+	var nxt = "<li class='right-arrow'> <a id='btnNext' onClick='fetchUrl(\"n\"); return false;'>></a> </li>";
+
+    for (var i = 1; i <= NewsListpages; i++) {
+        pageHtml += "<li><a href='#' onClick='fetchUrl(" + (i - 2) + ");return false;'>" + i + "</a></li>";
+    }
+
+    $("#pageInfo").html(pre + pageHtml + nxt);
+	renderPage(NewsListObj1.getFirst().value);
+}
+
+function renderPage(data) {
+    document.querySelector('#NewsListHtml').innerHTML = data.map(function (row) {
+		NewsID = row.ID;            		
+        row.Date ==null? NewsListdate ="-" : NewsListdate = row.Date;            
+        NewsListdate = new Date (NewsListdate)
+		row.Image.Url == null ? NewsListImagePath =ADSSAGlobalVariables.DefaultNAImage : NewsListImagePath = row.Image.Url;
+		
+		if(_spPageContextInfo.currentLanguage == 1025)
+        	{
+				row.TitleAr == null? NewsListTitle = "-" : NewsListTitle = row.TitleAr;
+				row.DescriptionAr == null? NewsDescription ="-" : NewsDescription = row.DescriptionAr;
+				debugger;
+				console.log(NewsListdate);
+				NewsListDate = convertToArabicDate(NewsListdate);
+			}
+			else
+			{
+				row.Title ==null ? NewsListTitle="-" : NewsListTitle = row.Title;
+				row.DescriptionEn == null ? NewsDescription ="-" : NewsDescription = row.DescriptionEn;
+				NewsListDate = GetEngDate(NewsListdate);
+			}
+			NewsDescription = stripHtml(NewsDescription);
+
+			if(NewsDescription.length>180)
+			{
+				NewsDescription = NewsDescription.substring(0,180)+"...";
+			}
+					return '<div class="col-12 mb-3">'+
+                          '<div class="border-radius news_cards  mb-3">'+
+                            '<div class="news-image" style="background-image: url('+ NewsListImagePath +');">'+
+                                '<img src="'+ NewsListImagePath +'" alt="" style="visibility: hidden;">'+
+                            '</div>'+
+                            '<div class="news-card-content">'+
+                                '<h2>'+ NewsListTitle +'</h2>'+
+                                '<p>'+ NewsDescription +'</p>'+
+
+                                '<div class="news-card-button">'+
+                                    '<a href="/MediaCenter/Pages/News.aspx?NewsID='+NewsID+'">'+ LanguageResourceVariable.ReadMore +'</a>'+
+                                    '<span >'+ NewsListDate +'</span>'+
+                                '</div>'+
+                            '</div>'+
+                          '</div>'+
+                      '</div>';
+        
+    });
+       		$("#LatestNews").html(LanguageResourceVariable.LatestNews);
+
+NewsListHtml='';
+}
+
+function fetchContents(url){
+
+	$.ajax({
+        async: true,  // Async by default is set to “true” load the script asynchronously //Title,%20Id
+        url: url,   // URL to fetch data from sharepoint list
+        method: "GET",  //Specifies the operation to fetch the list item
+        headers: {
+            "accept": "application/json;odata=nometadata",
+            "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "pragma": "no-cache",
+        },
+        success: function (data) {
+            renderPage(data.value);
+        },
+        error: function (error) {
+            console.log(JSON.stringify(error));
+        }
+    });
+}
+
+function fetchUrl(i) {
+    if (i == 'p') {
+        if (NewsListCurrentPage > 1) {
+            NewsListCurrentPage--;
+            if (NewsListCurrentPage== 1) renderPage(NewsListObj1.getFirst().value);
+            else {
+                var url = NewsListObj1.getNextUrls()[NewsListCurrentPage - 2];
+                fetchContents(url);
+            }
+        } else renderPage(NewsListObj1.getFirst().value);
+    } else if (i == 'n') {
+        if (NewsListCurrentPage < NewsListpages) {
+            NewsListCurrentPage++;
+            var url = NewsListObj1.getNextUrls()[NewsListCurrentPage - 2];
+            fetchContents(url);
+        }
+    }
+    else if (i == -1) {
+        NewsListCurrentPage = 1;
+        renderPage(NewsListObj1.getFirst().value);
+
+    } else {
+        NewsListCurrentPage = i + 2;
+        var url = NewsListObj1.getNextUrls()[i];
+        fetchContents(url);
+    }
+}
+
+function getPages(list, size, NewsListOrderBy, isAsc, cb, NewsListColumns) {
+
+    var nextUrls = [], firstFetch, NewsListpages, sort;
+
+    if (isAsc == true) {
+        sort = "asc";
+    }
+    else {
+        sort = "desc";
+    }
+
+    function cachePageUrl(page) {
+        if (!firstFetch) firstFetch = page;
+        if (page['odata.nextLink']) {
+            nextUrls.push(page['odata.nextLink']);
+            $.ajax({
+                async: true,  // Async by default is set to “true” load the script asynchronously
+                url: page['odata.nextLink'],
+                method: "GET",  //Specifies the operation to fetch the list item
+                headers: {
+                    "accept": "application/json;odata=nometadata",
+                    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+                    "cache-control": "no-cache",
+                    "content-type": "application/json",
+                    "pragma": "no-cache",
+                },
+                success: cachePageUrl,
+                error: function (error) {
+                    console.log(JSON.stringify(error));
+                }
+
+            })
+        } else cb({ getFirst: getFirst, getNextUrls: getNextUrls })
+    }
+
+    $.ajax({
+        async: true,  // Async by default is set to “true” load the script asynchronously
+        url: NewsListSiteURL + "/_api/web/lists/GetByTitle('" + list + "')",   // URL to fetch data from sharepoint list
+        method: "GET",  //Specifies the operation to fetch the list item
+        headers: {
+            "accept": "application/json;odata=nometadata",
+            "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "pragma": "no-cache",
+        },
+        success: function (props) {
+            NewsListpages = parseInt(props.ItemCount / size);
+            NewsListpages += (props.ItemCount % size > 0) ? 1 : 0;
+            $.ajax({
+                async: true,  // Async by default is set to “true” load the script asynchronously //Title,%20Id
+                url: NewsListSiteURL + "/_api/web/lists/getByTitle('" + list + "')/items?$select=" + NewsListColumns + "&$top=" + size + "&$orderby=" + NewsListOrderBy + "%20" + sort,   // URL to fetch data from sharepoint list
+                method: "GET",  //Specifies the operation to fetch the list item
+                headers: {
+                    "accept": "application/json;odata=nometadata",
+                    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+                    "cache-control": "no-cache",
+                    "content-type": "application/json",
+                    "pragma": "no-cache",
+                },
+                success: cachePageUrl,
+                error: function (error) {
+                    console.log(JSON.stringify(error));
+                }
+            })
+        },
+        error: function (error) {
+            console.log(JSON.stringify(error));
+        }
+    })
+    function goto(page) {
+        return new Promise(function (res, rej) {
+            if (page == 1) {
+                firstFetch.then(function (r) {
+                    res(r.results);
+                });
+            }
+            else {
+                fetch(nextUrls[page - 2], { headers: headers }).then(function (d) {
+                    return d.json();
+                }).then(function (r) {
+                    res(r.value);
+                });
+            }
+        });
+    };
+    function getNextUrls() {
+        return nextUrls;
+    }
+    function getFirst() {
+        return firstFetch;
+    }
+}
+  function stripHtml(html)
+{
+debugger;
+   var tmp = document.createElement("DIV");
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || "";
+}
+
+//---------- Script to convert date into Arabic Starts --------------------
+function convertToArabicDate(ArabicDate)
+{
+debugger;
+	var months = ["?????", "??????", "????", "?????", "????", "?????",
+	  "?????", "?????", "??????", "??????", "??????", "??????"
+	];
+	var ArDays = ["????", "??????", "????????", "???????", "??????", "??????", "?????"];
+	var numericday= ['?','?','?','?','?','?','?','?','?','?'];
+	delDateString = ArDays[(ArabicDate.getDay())] + ' ' + months[ArabicDate.getMonth()] +' '+ ArabicDate.getDate().toString().toArabicDigits() + '? ' + ArabicDate.getFullYear().toString().toArabicDigits() ;
+	return delDateString;
+}
+
+String.prototype.toArabicDigits= function(){
+ var id= ['?','?','?','?','?','?','?','?','?','?'];
+ return this.replace(/[0-9]/g, function(w){
+  return id[+w]
+ });
+}
+//---------- Script to convert date into Arabic Ends -------------------- 
+//---------- Script to get Date in English Starts -----------------------
+function GetEngDate(EngDate)
+{
+	var TheDate='';
+	Days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+	Months=["January","February","March","April","May","June","July","August","September","October","November","December"]
+	
+	TheDate = Days[(EngDate.getDay())-1] + ' ' + Months[(EngDate.getMonth())] + ' ' + EngDate.getDate() +', '+ EngDate.getFullYear();
+	return TheDate;
+}    
+//---------- Script to get Date in English Ends -------------------- 
+</script>
+<div class="inner-content-page">
+
+                        <h3 class="inner-sub-name mb-4" id="LatestNews">Latest News</h3>                                            
+                        <div class="row" id="NewsListHtml">                                             
+                        </div>                       
+                </div>
+<!--<div id="pageInfo"></div>-->
+ <div class="row mb-4">
+                            <div class="col-12">
+                                <ul class="pagination-number" id="pageInfo">
+                                    <!--<li class="left-arrow"> <a href=""><</a> </li>
+                                    <li><a href="" class="active-page-num">1</a></li>
+                                    <li><a href="">2</a></li>
+                                    <li><a href="">3</a></li>
+                                    <li class="right-arrow"> <a href="">></a> </li>-->
+                                </ul>
+                            </div>
+                        </div>

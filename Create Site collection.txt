@@ -1,0 +1,6 @@
+1) open central administration
+2) click Create site collections under Application Management
+3) Write title, Url 
+4) Select a template >> click Publishing tab and select Publishing Portal
+5) Primary Site Collection Administrator >> write username (e.g. spadmin)
+6) Click OK button

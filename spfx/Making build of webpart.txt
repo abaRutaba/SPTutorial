@@ -1,0 +1,57 @@
+------multiple webpart in same soultion------
+yo @microsoft/sharepoint
+
+---------------if gulp serve does not work use following---------------
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+
+---------------to loads any file in another file---------------
+
+
+import { SPComponentLoader } from"@microsoft/sp-loader";
+
+
+SPComponentLoader.loadCss(require("./assets/css/calender.css"))
+
+-----------Load imgs-------------
+const Configer: string = require('./assets/images/icons8-database-administrator-100.png');
+
+---------------open workbench---------------
+workbench URL: write your url with _layouts/15/workbench.aspx
+
+
+--------------- run webpart in sp env ---------------
+gulp serve --nobrowser
+
+----------------deploy pkg into sp env---------------
+gulp clean
+gulp bundle --ship
+gulp package-solution --ship
+
+goto admin>>resource>>sites>>click on site url>>Apps for sharepoint>>drag n drop your solution here then press deploy button
+
+------------------install pnp---------------
+npm install @pnp/sp @pnp/common --save
+or
+npm install sp-pnp-js -–save (correct)
+
+
+import { sp, List, Item, ItemAddResult, ItemUpdateResult } from 'sp-pnp-js';
+
+---------install jquery---------
+npm install jquery --save
+SPComponentLoader.loadCss is to load css
+
+Approach 1: You need install the typings of jquery as below:
+
+tsd install jquery --save
+After that in your config.json, add the below entry in the externals sections:
+
+"jquery": "https://code.jquery.com/jquery-3.1.0.min.js"
+After that, in your webpart you need to import jQuery
+
+import * as $ from 'jquery';
+After that, you can use your code :
+
+$("#myDiv").show()
+------------------- import custom css file ------------
+import "./weather.css";

@@ -1,0 +1,93 @@
+.my-calender{
+    position: relative;
+    border: 1px solid #ddd;
+    padding: 22px;
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: cursive;
+  }
+  .my-calender--overlay{
+    background-color: rgba(0,0,0,0.2);
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9;
+  }
+  .my-calender--popup {
+    background: #f2f2f2;
+    color: #777;
+    padding: 15px 25px;
+    position: absolute;
+    left: -100%;
+    top: 0px;
+    bottom: 0px;
+    width: 60%;
+    z-index: 9;
+    min-width: 300px;
+    transition: 0.5s all ease-in-out;
+    
+  }
+  .my-calender--popup .wrap{
+    height: 500px;
+    overflow-y: auto;
+  }
+  .my-calender.open .my-calender--popup{
+    left: 0px;
+  }
+  .my-calender--popup-btn-close{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: block;
+    font-size: 22px;
+    text-decoration: none;
+    color: #274471;
+  }
+  .my-calender--dater{
+    background: #1f02ffa8;
+
+    color: #fff;
+    padding: 20px;
+    float: right;
+  }
+  .my-calender--dater {
+    background: #1f02ffa8;
+    color: #fff;
+    padding: 20px;
+    float: right;
+    width: 130px;
+    margin: 0 10px 10px 15px;
+    height: 220px;
+    z-index: 1;    
+    text-align: center;
+  }
+  .mcd--date {
+    display: block;
+    font-size: 42px;
+    text-align: center;
+    margin-top: 20px;
+}
+.mcd--day {
+    display: block;
+    font-size: 24px;
+    margin-top: 10px;
+    font-weight: 300;
+}
+.mcd--month-year {
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
+}
+
+.calendar-bcm-row {
+    display: flex;
+    display: -webkit-flex;
+}
+.calendar-bcm-row .bcm-col-md-4 .bcm-panel-default{
+    height: 100%;
+}
+.calendar-bcm-row .bcm-col-md-4 .bcm-panel-default .wrap{
+    height: 400px;
+}

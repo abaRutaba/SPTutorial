@@ -1,0 +1,3 @@
+var NewsDateTime= new Date(date);
+            var NewsDate= NewsDateTime.toDateString().split(" ")[2]+" " + NewsDateTime.toDateString().split(" ")[1]+", " + NewsDateTime.toDateString().split(" ")[3];
+

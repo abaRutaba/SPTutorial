@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "layouts-webpart-rutaba-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/layoutsWebpartRutaba/LayoutsWebpartRutabaWebPart.js",
+          "manifest": "./src/webparts/layoutsWebpartRutaba/LayoutsWebpartRutabaWebPart.manifest.json"
+        }
+      ]
+    },
+    "site-script-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/siteScript/SiteScriptWebPart.js",
+          "manifest": "./src/webparts/siteScript/SiteScriptWebPart.manifest.json"
+        }
+      ]
+    },
+    
+     
+    "gapi-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/gapi/GapiWebPart.js",
+          "manifest": "./src/webparts/gapi/GapiWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "LayoutsWebpartRutabaWebPartStrings": "lib/webparts/layoutsWebpartRutaba/loc/{locale}.js",
+    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js",
+    "SiteScriptWebPartStrings": "lib/webparts/siteScript/loc/{locale}.js",
+    "MailGraphApiWebPartStrings": "lib/webparts/mailGraphApi/loc/{locale}.js",
+    "GapiWebPartStrings": "lib/webparts/gapi/loc/{locale}.js"
+  }
+}

@@ -1,0 +1,13 @@
+$pnp.sp.web.siteUsers.get().then(function(data) {
+
+    var users = "";
+
+    for (var i = 0; i < data.length; i++) {
+
+        users += data[i].Id + " - " + data[i].Title + "<br/>";
+
+    }
+
+    document.getElementById("sample").innerHTML = users;
+
+});

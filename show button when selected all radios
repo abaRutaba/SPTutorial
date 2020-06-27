@@ -1,0 +1,248 @@
+<script src="/Style Library/Adib/PNP/jquery-3.3.1.min.js"></script>
+<script src="/Style Library/Adib/PNP/fetch.min.js" type="text/javascript"></script>
+<script src="/Style Library/Adib/PNP/es6-promise.min.js" type="text/javascript"></script>
+<script src="/Style Library/Adib/PNP/pnp.min.js" type="text/javascript"></script>
+
+<script>
+
+var QuestionArray=[];
+
+var selectedOption = "", QMAListUserID="",len="", IDD="";
+$(document).ready(function(){ getNewQuestions()})
+	function getNewQuestions(){
+var count = 0;
+$pnp.sp.web.lists.getByTitle("questionOfMonth3").items.filter("isActive eq 1").get().then(function(items)
+{
+	var HTML = "", imgHTML = "";
+		
+	items.forEach(function(item)
+	{
+		console.log(item)
+		Question  = item['Question']
+		option1 = item['option1']
+		option2 = item['option2']
+		option3 = item['option3']
+		option4 = item['option4']
+		isActive = item['isActive']
+		ID = item['ID']	
+		
+		
+		
+		
+		idOfCheck = "checkans"+ID;
+		nameOfQuestion = "question"+ID;
+		QuestionArray.push({Q:Question, QID:ID, QName:nameOfQuestion, radioChechkedID:idOfCheck});
+		if(isActive)
+		{
+			HTML += '<p>'+Question+'</p><ul id="'+idOfCheck+'"><li><input type="radio" name="'+nameOfQuestion+'" value="'+option1+'">'+option1+'</li><li><input type="radio" name="'+nameOfQuestion+'" value="'+option2+'">'+option2+'</li><li><input type="radio" name="'+nameOfQuestion+'" value="'+option3+'">'+option3+'</li><li><input type="radio" name="'+nameOfQuestion+'" value="'+option4+'">'+option4+'</li></ul>';
+			publishingCall(ID);							
+			//count++;	
+		}
+		
+	});
+	
+	QuestionArray.forEach(function (array){
+	$pnp.sp.web.lists.getByTitle("QuestionOfMonthAnswers").items.select("*").filter("UserId eq '"+_spPageContextInfo.userId+"' and QuestionID eq '"+array.QID+"'").get().then(function(data)
+		{
+				len = data.length;
+				console.log(";lieyfgeoyueoiruoeiuroeueoyoriyu");
+				//console.log(data[0].Answer);
+				
+				
+				
+				$("#"+array.radioChechkedID+" li").each(function(index)
+				{
+					//console.log(index + ": " + $( this ).text());
+					if($(this).text() == data[0].Answer)
+					{
+						$(':radio:not(:checked)').attr('disabled', true);
+						$($("#"+array.radioChechkedID+" li")[index]).attr("style","color:green");				
+						$('input:radio[name='+array.QName+']')[index].checked = true;						
+						$("#targetBtn").hide();
+						count++;
+					}
+				});
+				debugger;
+				console.log("yup");
+							
+		});
+		debugger;
+		console.log("yup");
+
+	});
+		/*$pnp.sp.web.lists.getByTitle("QuestionOfMonthAnswers").items.select("*").filter("UserId eq '"+_spPageContextInfo.userId+"' and QuestionID eq '"+ID+"'").get().then(function(data)
+		{
+				len = data.length;
+				//console.log(data[0].Answer);
+				
+				
+				
+				$("#"+idOfCheck+" li").each(function(index)
+				{
+					//console.log(index + ": " + $( this ).text());
+					if($(this).text() == data[0].Answer)
+					{
+						$(':radio:not(:checked)').attr('disabled', true);
+						$($("#"+idOfCheck+" li")[index]).attr("style","color:green");				
+						$('input:radio[name='+nameOfQuestion+']')[index].checked = true;
+						$("#targetBtn").hide();
+					}
+				});
+							
+		});*/
+		//console.log("HTML====>", HTML)
+		$("#questionDiv").html(HTML+'<a href="#" class="submit-btn" id="targetBtn" onClick="submitQuestion(QuestionArray)" style="display:none;">Submit</a>');
+		
+		
+		var check = true;
+		inputChecked();
+		function inputChecked()
+		{
+		//alert("Checking");
+		
+			check =true;
+		 	$("input:radio").each(function()
+		 	{
+            var name = $(this).attr("name");
+            
+            if($("input:radio[name="+name+"]:checked").length == 0){
+                check = false;
+            }
+        	});
+
+			if(check && count<1)
+			{			
+			  $("#targetBtn").show();			  
+			}
+		
+			else
+			{
+			console.log("Checking-=========================");
+			setTimeout(function(){ inputChecked() }, 300);
+			}				
+		}// end inputChecked()
+     
+
+
+		
+	});
+	
+//getting current user id with QuestionID
+}// end of questionOfonth3 pnp
+
+
+var lenght="";
+function publishingCall(id)
+{	
+    $pnp.sp.web.lists.getByTitle("questionOfMonth3").items.getById(id).select("PublishingPageIcon").fieldValuesAsHTML.get().then(function(e){
+    var str = e.PublishingPageIcon;
+    str= str.substring(str.indexOf("src")+5, str.indexOf("style")-2);
+    $("#imgDDiv").append('<img src="'+str+'" id="ImgId'+id+'" alt="">');
+
+    });
+   
+}
+function submitQuestion(QuestionArray)
+{
+console.log("?????????????????????");
+console.log("QuestionArray =============>",QuestionArray)
+QuestionArray.forEach(function(question)
+{
+	console.log(question.Q);
+
+	QuestionID = question.QID;
+	Question = question.Q;
+	
+	var e = document.getElementsByName(question.QName);
+	//console.log(document.getElementsByName(question.QName))
+	for(i = 0; i < e.length; i++) 
+	{ 
+       if(e[i].checked) 
+       {
+
+			userID = _spPageContextInfo.userId;
+       		UserLoginName = _spPageContextInfo.userLoginName; 
+       		      		
+       	items = 
+       		 {
+			    Title : "",
+			    Question : Question,
+			    Answer : e[i].value,
+			    User : UserLoginName,
+			    UserId : userID.toString(),
+			    QuestionID : QuestionID 
+			   
+		     } 
+		    
+
+
+		     $pnp.sp.web.lists.getByTitle('QuestionOfMonthAnswers').items.add(items).then(function(){
+           		
+           		$("#questionDiv").html('');
+        		$("#imgDDiv").html('');
+           		getNewQuestions();
+        });
+       
+       }// end if
+    }// end for
+    });// end QuestionArray.forEach
+}// end submitQuestion
+
+</script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="/Style Library/Adib/css/bootstrap.min.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="/Style Library/Adib/css/bootstrap.css">
+    <link rel="stylesheet" href="/Style Library/Adib/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="/Style Library/Adib/css/style.css">
+    <script src="/Style Library/Adib/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/Style Library/Adib/icomoon/style.css">
+ 
+    <!-- Owl carousel slider  -->
+  <link rel="stylesheet" href="/Style Library/Adib/owl/owl.carousel.css">
+  <!-- Default Theme -->
+  <link rel="stylesheet" href="/Style Library/Adib/owl/owl.theme.css">
+
+
+   <!--Slic Nav for Responsive Menu-->
+ <link rel="stylesheet" href="/Style Library/Adib/slicknav/slicknav.css">
+ <script src="slicknav/jquery.slicknav.js"></script>  
+<script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+  
+
+
+ 
+
+<!---Question of the month start-->
+<div class="question-month">
+  <div class="row">
+    <h3><span class="icon-Icon-150px-06"></span>Question of the Month</h3>
+    <div class="col-md-8 col-sm-12 pull-left" id="questionDiv">
+    </div>
+    
+  <div class="col-md-4  col-sm-12 pull-right" id="imgDDiv">
+  </div>
+
+  
+  
+  </div>
+</div>
+<!---Question of the month start-->
+
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/Style Library/Adib/js/bootstrap.js"></script>
+    <script src="/Style Library/Adib/js/custom.js"></script>
+    
+    <!-- owl js--> 
+    <script src="/Style Library/Adib/owl/owl.carousel.js"></script> 
+ 
